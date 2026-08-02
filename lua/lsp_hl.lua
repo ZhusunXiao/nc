@@ -55,7 +55,7 @@ set(0, "@lsp.type.operator",     { fg = "#808080",                  default = tr
 set(0, "@lsp.mod.global",        { fg = "#79D4FF",                  default = true })  -- global var (brighter blue)
 set(0, "@lsp.mod.classScope",    { fg = "#7DCFFF", underline = true, default = true })  -- class-scoped (same as property)
 set(0, "@lsp.mod.fileScope",     { fg = "#5DB4E0",                  default = true })  -- file-static (muted blue)
-set(0, "@lsp.mod.functionScope", { fg = "#9CDCFE", italic = true,   default = true })  -- function-local (light blue)
+set(0, "@lsp.mod.functionScope", { fg = "#9CDCFE",                  default = true })  -- function-local (plain light blue)
 
 -- ═══════════════ PURE TYPOGRAPHIC MODIFIERS — compose with base colour ═
 set(0, "@lsp.mod.readonly",      { italic = true,                    default = true })

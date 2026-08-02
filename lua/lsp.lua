@@ -3,11 +3,27 @@
 
 local nc = require("nc")
 
+-- Treesitter: enable syntax highlighting (handles if/void/break/false etc.)
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "c", "cpp", "objc", "objcpp", "cuda" },
+  callback = function()
+    vim.treesitter.start()
+  end,
+})
+
 -- fallback default
 vim.lsp.config["clangd"] = {
   cmd = { "clangd" },
   filetypes = { "c", "cpp", "objc", "objcpp", "cuda" },
   root_markers = { "nc.lua", ".git", "compile_commands.json", "compile_flags.txt" },
+  handlers = {
+    ["textDocument/semanticTokens"] = {
+      highlight = { priority = 200 },
+    },
+    ["textDocument/semanticTokens/full"] = {
+      highlight = { priority = 200 },
+    },
+  },
 }
 vim.lsp.enable("clangd")
 
