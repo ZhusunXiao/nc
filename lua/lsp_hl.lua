@@ -36,7 +36,7 @@ set(0, "@lsp.type.string",       { fg = "#CE9178", default = true })  -- string 
 set(0, "@lsp.type.number",       { fg = "#B5CEA8", default = true })  -- numeric literal
 set(0, "@lsp.type.regexp",       { fg = "#D16969", default = true })  -- regex (red-brown)
 set(0, "@lsp.type.operator",     { fg = "#D4D4D4", default = true })  -- operator
-set(0, "@lsp.type.comment",      { fg = "#6A9955", italics = true, default = true })  -- comment
+set(0, "@lsp.type.comment",      { fg = "#6A9955", italic = true, default = true })  -- comment
 
 -- ═══════════════ MODIFIERS (compose with base colour) ═══════════════
 -- These only set typographic styles — the base colour from the type above is preserved.
