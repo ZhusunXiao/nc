@@ -86,6 +86,13 @@ local function resolve()
   return cache[key]
 end
 
+---Check whether a key exists in the nc.lua config (truthy value).
+---@param key string
+---@return boolean
+function M.has(key)
+  return M.get(key) ~= nil
+end
+
 ---Clear all cached project data (e.g. on DirChanged)
 function M.clear()
   cache = {}
@@ -138,9 +145,12 @@ function M.info()
     table.insert(lines, "")
     table.insert(lines, "── config ──")
 
-    -- flatten config table into indented lines
+    -- flatten config table into indented lines (sorted keys)
     local function flatten(t, indent)
-      for k, v in pairs(t) do
+      local keys = vim.tbl_keys(t)
+      table.sort(keys)
+      for _, k in ipairs(keys) do
+        local v = t[k]
         if type(v) == "table" then
           table.insert(lines, indent .. k .. ":")
           flatten(v, indent .. pad)

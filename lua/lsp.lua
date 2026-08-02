@@ -1,5 +1,7 @@
 -- LSP via Neovim 0.12+ built-in vim.lsp.config
--- clangd path: walks up from every C/C++ buffer BEFORE LSP starts
+-- clangd path: resolved per-project via nc module
+
+local nc = require("nc")
 
 -- fallback default
 vim.lsp.config["clangd"] = {
@@ -9,32 +11,13 @@ vim.lsp.config["clangd"] = {
 }
 vim.lsp.enable("clangd")
 
--- Resolve nc.lua BEFORE FileType triggers LSP start (BufReadPre fires first)
+-- Re-resolve nc.lua BEFORE FileType triggers LSP (BufReadPre fires first)
 vim.api.nvim_create_autocmd("BufReadPre", {
   pattern = { "*.c", "*.cpp", "*.h", "*.hpp", "*.cxx", "*.cc", "*.ixx", "*.cppm" },
   callback = function()
-    local file = vim.fn.expand("%:p")
-    if file == "" then return end
-
-    -- walk up to find nc.lua
-    local dir = vim.fn.fnamemodify(file, ":h")
-    local last = nil
-    while dir ~= "" and dir ~= last do
-      local candidate = dir .. "/nc.lua"
-      if vim.uv.fs_stat(candidate) then
-        local ok, cfg = pcall(dofile, candidate)
-        if ok and type(cfg) == "table" and cfg.clangd and cfg.clangd.path then
-          vim.lsp.config["clangd"].cmd = { cfg.clangd.path }
-          return
-        end
-        break
-      end
-      last = dir
-      dir = vim.fn.fnamemodify(dir, ":h")
-    end
-
-    -- no nc.lua found → fallback to system PATH
-    vim.lsp.config["clangd"].cmd = { "clangd" }
+    nc.clear() -- force re-walk from the current buffer
+    local path = nc.get("clangd.path")
+    vim.lsp.config["clangd"].cmd = { path or "clangd" }
   end,
 })
 
