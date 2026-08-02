@@ -1,0 +1,7 @@
+lazy-lock.json
+plugin/
+packer_compiled.lua
+doc/
+*.so
+*.dll
+.DS_Store
