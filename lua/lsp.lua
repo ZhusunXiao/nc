@@ -3,6 +3,14 @@
 
 local nc = require("nc")
 
+-- Treesitter (parsers installed manually, no plugin needed)
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "c", "cpp", "objc", "objcpp", "cuda" },
+  callback = function()
+    pcall(vim.treesitter.start)
+  end,
+})
+
 -- fallback default
 vim.lsp.config["clangd"] = {
   cmd = { "clangd" },
