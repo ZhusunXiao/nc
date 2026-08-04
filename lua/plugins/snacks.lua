@@ -97,8 +97,6 @@ return {
     { "<c-_>",      function() Snacks.terminal() end, desc = "which_key_ignore" },
     { "]]",         function() Snacks.words.jump(vim.v.count1) end, desc = "Next Reference", mode = { "n", "t" } },
     { "[[",         function() Snacks.words.jump(-vim.v.count1) end, desc = "Prev Reference", mode = { "n", "t" } },
-    -- nc
-    { "<leader>nc",  function() require("nc").info() end, desc = "nc.lua Config" },
     {
       "<leader>N",
       desc = "Neovim News",

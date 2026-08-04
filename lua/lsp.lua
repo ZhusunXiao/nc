@@ -1,14 +1,10 @@
 -- LSP via Neovim 0.12+ built-in vim.lsp.config
--- clangd path: resolved per-project via nc module
 
-local nc = require("nc")
-
-
--- fallback default
+-- clangd
 vim.lsp.config["clangd"] = {
   cmd = { "clangd" },
   filetypes = { "c", "cpp", "objc", "objcpp", "cuda" },
-  root_markers = { "nc.lua", ".git", "compile_commands.json", "compile_flags.txt" },
+  root_markers = { ".git", "compile_commands.json", "compile_flags.txt" },
   handlers = {
     ["textDocument/semanticTokens"] = {
       highlight = { priority = 200 },
@@ -20,15 +16,6 @@ vim.lsp.config["clangd"] = {
 }
 vim.lsp.enable("clangd")
 
--- Re-resolve nc.lua BEFORE FileType triggers LSP (BufReadPre fires first)
-vim.api.nvim_create_autocmd("BufReadPre", {
-  pattern = { "*.c", "*.cpp", "*.h", "*.hpp", "*.cxx", "*.cc", "*.ixx", "*.cppm" },
-  callback = function()
-    nc.clear() -- force re-walk from the current buffer
-    local path = nc.get("clangd.path")
-    vim.lsp.config["clangd"].cmd = { path or "clangd" }
-  end,
-})
 
 -- LSP keymaps (Snacks already handles gd/gD/gr/gi/gy)
 vim.api.nvim_create_autocmd("LspAttach", {
