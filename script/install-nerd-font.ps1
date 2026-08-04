@@ -63,15 +63,16 @@ Write-Step "Extracting ..."
 Expand-Archive -Path $ZipPath -DestinationPath $ExtractDir -Force
 
 Write-Step "Installing ..."
+$shell = New-Object -ComObject Shell.Application
+$dest = $shell.Namespace(0x14)
+
 $n = 0
-Get-ChildItem $ExtractDir -Filter "*.ttf" -Recurse | ForEach-Object {
-    Copy-Item $_.FullName (Join-Path $FontDir $_.Name) -Force; Write-OK $_.Name; $n++
+Get-ChildItem $ExtractDir -Filter "*Mono*.ttf" -Recurse | ForEach-Object {
+    $dest.CopyHere($_.FullName, 0x10)
+    Write-OK $_.Name
+    $n++
 }
 
-Add-Type -AssemblyName System.Drawing
-$fc = [System.Drawing.Text.PrivateFontCollection]::new()
-Get-ChildItem $ExtractDir -Filter "*.ttf" -Recurse | ForEach-Object { $fc.AddFontFile($_.FullName) }
-
 Remove-Item $ZipPath, $ExtractDir -Force -Recurse -ErrorAction SilentlyContinue
-Write-Host "Installed $n font(s)." -ForegroundColor Green
-Write-Host "Terminal font: 'JetBrainsMono Nerd Font Mono'" -ForegroundColor Yellow
+Write-Host "Installed $n font(s). Restart Windows Terminal to see them." -ForegroundColor Green
+Write-Host "Font name: 'JetBrainsMono Nerd Font Mono'" -ForegroundColor Yellow
