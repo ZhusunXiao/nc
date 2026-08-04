@@ -21,3 +21,6 @@ vim.opt.scrolloff = 4               -- keep 4 lines of context when scrolling
 vim.opt.sidescrolloff = 8           -- keep 8 cols of context horizontally
 vim.opt.wrap = false                -- no soft-wrap by default
 vim.opt.swapfile = false            -- no swap files (use undo history instead)
+
+-- Mouse middle-click → :q
+vim.keymap.set("n", "<MiddleMouse>", ":q<CR>", { desc = "Quit" })
