@@ -21,3 +21,6 @@ vim.opt.scrolloff = 4               -- keep 4 lines of context when scrolling
 vim.opt.sidescrolloff = 8           -- keep 8 cols of context horizontally
 vim.opt.wrap = false                -- no soft-wrap by default
 vim.opt.swapfile = false            -- no swap files (use undo history instead)
+
+-- VSCode-style breadcrumbs: namespace > class > function at top of window
+vim.opt.winbar = "%{%v:lua.require('snacks').scope.get()%}"
