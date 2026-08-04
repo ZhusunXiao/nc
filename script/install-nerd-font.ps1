@@ -5,7 +5,7 @@ param(
     [string]$FontName = "JetBrainsMono",
     [string]$Version  = "v3.5.0",
     [string]$Proxy    = "",
-    [int]$TimeoutSec  = 15
+    [int]$TimeoutSec  = 120
 )
 
 $ProgressPreference = "SilentlyContinue"
