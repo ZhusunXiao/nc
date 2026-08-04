@@ -10,5 +10,6 @@ return {
   opts = {
     show_modified = true,
     separator = "  ",
+    },
   },
 }
