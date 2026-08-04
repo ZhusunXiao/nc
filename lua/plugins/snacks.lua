@@ -7,6 +7,7 @@ return {
     bigfile = { enabled = true },
     dashboard = { enabled = true },
     explorer = { enabled = true },
+    picker = { sources = { explorer = { watch = false } } },
     indent = { enabled = true },
     input = { enabled = true },
     notifier = {
