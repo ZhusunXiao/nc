@@ -26,10 +26,12 @@ vim.opt.swapfile = false            -- no swap files (use undo history instead)
 vim.api.nvim_create_user_command("DiffOrig", function()
   local fname = vim.fn.expand("%:p")
   if fname == "" then return end
+  local lines = vim.fn.readfile(fname)
   vim.cmd("leftabove vnew")
   vim.bo.buftype = "nofile"
   vim.bo.bufhidden = "wipe"
-  vim.cmd("silent 0read ++edit " .. vim.fn.fnameescape(fname))
+  vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
+  vim.bo.modified = false
   vim.cmd("diffthis")
   vim.cmd("wincmd p")
   vim.cmd("diffthis")
