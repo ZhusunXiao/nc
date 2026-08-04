@@ -7,6 +7,9 @@ param(
     [string]$Proxy    = ""
 )
 
+# Force TLS 1.2 (required by GitHub / ghproxy)
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
 $ProgressPreference = "SilentlyContinue"
 $ErrorActionPreference = "Stop"
 
@@ -14,7 +17,6 @@ $FontDir   = "$env:LOCALAPPDATA\Microsoft\Windows\Fonts"
 $UrlPath   = "/ryanoasis/nerd-fonts/releases/download/$Version/${FontName}.zip"
 $GithubUrl = "https://github.com${UrlPath}"
 
-# Mirror first (GitHub blocked in CN), direct as last resort
 $urls = @(
     "https://mirror.ghproxy.com${UrlPath}",
     "https://ghproxy.net${UrlPath}",
@@ -47,7 +49,7 @@ for ($i = 0; $i -lt $urls.Count; $i++) {
         $ok = $true
         break
     } catch {
-        Write-Err "Failed"
+        Write-Err "Failed: $($_.Exception.Message)"
         Remove-Item $ZipPath -Force -ErrorAction SilentlyContinue
     }
 }
