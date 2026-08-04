@@ -3,14 +3,15 @@
 
 param(
     [string]$FontName = "JetBrainsMono",
-    [string]$Version = "v3.5.0",
-    [string]$Proxy = ""
+    [string]$Version  = "v3.5.0",
+    [string]$Proxy    = "",
+    [int]$TimeoutSec  = 15
 )
 
 $ProgressPreference = "SilentlyContinue"
-$FontDir = "$env:LOCALAPPDATA\Microsoft\Windows\Fonts"
-$DirectUrl = "https://github.com/ryanoasis/nerd-fonts/releases/download/$Version/${FontName}.zip"
-$Mirrors = @("https://ghproxy.net/", "https://mirror.ghproxy.com/")
+$FontDir    = "$env:LOCALAPPDATA\Microsoft\Windows\Fonts"
+$DirectUrl  = "https://github.com/ryanoasis/nerd-fonts/releases/download/$Version/${FontName}.zip"
+$Mirrors    = @("https://ghproxy.net/", "https://mirror.ghproxy.com/")
 
 function Write-Step($m) { Write-Host "==> $m" -ForegroundColor Cyan }
 function Write-OK($m)   { Write-Host "    $m" -ForegroundColor Green }
@@ -31,15 +32,28 @@ foreach ($m in $Mirrors) { $urls += $m + $DirectUrl }
 
 $ok = $false
 for ($i = 0; $i -lt $urls.Count; $i++) {
-    $label = if ($i -eq 0) { "direct" } else { "mirror" }
+    $label = if ($i -eq 0) { "direct ($TimeoutSec s)" } else { "mirror" }
     Write-Step "Trying $label ..."
-    try {
-        Invoke-WebRequest -Uri $urls[$i] -OutFile $ZipPath -UseBasicParsing -TimeoutSec 120 @ProxyArgs
+
+    $job = Start-Job -ScriptBlock {
+        param($u, $f, $t, $pa)
+        try {
+            Invoke-WebRequest -Uri $u -OutFile $f -UseBasicParsing -TimeoutSec $t @pa
+            return $true
+        } catch { return $false }
+    } -ArgumentList $urls[$i], $ZipPath, $TimeoutSec, $ProxyArgs
+
+    $done = Wait-Job $job -Timeout $($TimeoutSec + 5)
+    $result = Receive-Job $job
+    Remove-Job $job -Force
+
+    if ($result) {
         $sz = [math]::Round((Get-Item $ZipPath).Length/1MB, 1)
         Write-OK "Downloaded $sz MB"
         $ok = $true
         break
-    } catch { Write-Err "Failed: $_" }
+    }
+    Write-Err "Failed (timeout)"
 }
 
 if (-not $ok) {
