@@ -22,6 +22,9 @@ vim.opt.sidescrolloff = 8           -- keep 8 cols of context horizontally
 vim.opt.wrap = false                -- no soft-wrap by default
 vim.opt.swapfile = false            -- no swap files (use undo history instead)
 
+-- breadcrumbs via nvim-navic
+vim.o.winbar = "%{v:lua.require('nvim-navic').get_location()%}"
+
 -- Diff current buffer against the saved version on disk
 vim.api.nvim_create_user_command("DiffOrig", function()
   local fname = vim.fn.expand("%:p")
