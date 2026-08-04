@@ -24,3 +24,17 @@ vim.opt.swapfile = false            -- no swap files (use undo history instead)
 
 -- VSCode-style breadcrumbs: namespace > class > function at top of window
 vim.opt.winbar = "%{%v:lua.require('snacks').scope.get()%}"
+
+-- Diff current buffer against the saved version on disk
+vim.api.nvim_create_user_command("DiffOrig", function()
+  local fname = vim.fn.expand("%:p")
+  if fname == "" then return end
+  vim.cmd("leftabove vnew")
+  vim.bo.buftype = "nofile"
+  vim.bo.bufhidden = "wipe"
+  vim.cmd("silent 0read ++edit " .. vim.fn.fnameescape(fname))
+  vim.cmd("diffthis")
+  vim.cmd("wincmd p")
+  vim.cmd("diffthis")
+end, {})
+vim.keymap.set("n", "<leader>D", ":DiffOrig<CR>", { desc = "Diff against saved file" })
