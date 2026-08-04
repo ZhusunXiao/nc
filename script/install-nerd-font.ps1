@@ -2,68 +2,64 @@
 # Run: powershell -ExecutionPolicy Bypass -File install-nerd-font.ps1 [-Proxy "http://127.0.0.1:7890"]
 
 param(
-    [string] = "JetBrainsMono",
-    [string] = "v3.5.0",
-    [string] = ""
+    [string]$FontName = "JetBrainsMono",
+    [string]$Version = "v3.5.0",
+    [string]$Proxy = ""
 )
 
- = "SilentlyContinue"
- = ":LOCALAPPDATA\Microsoft\Windows\Fonts"
- = "https://github.com/ryanoasis/nerd-fonts/releases/download//.zip"
- = @("https://ghproxy.net/", "https://mirror.ghproxy.com/")
+$ProgressPreference = "SilentlyContinue"
+$FontDir = "$env:LOCALAPPDATA\Microsoft\Windows\Fonts"
+$DirectUrl = "https://github.com/ryanoasis/nerd-fonts/releases/download/$Version/${FontName}.zip"
+$Mirrors = @("https://ghproxy.net/", "https://mirror.ghproxy.com/")
 
-function Write-Step() { Write-Host "==> " -ForegroundColor Cyan }
-function Write-OK()   { Write-Host "    " -ForegroundColor Green }
-function Write-Err()  { Write-Host " !! " -ForegroundColor Red }
+function Write-Step($m) { Write-Host "==> $m" -ForegroundColor Cyan }
+function Write-OK($m)   { Write-Host "    $m" -ForegroundColor Green }
+function Write-Err($m)  { Write-Host " !! $m" -ForegroundColor Red }
 
- = @{}
-if () { ["Proxy"] = ; Write-OK "Proxy: " }
+$ProxyArgs = @{}
+if ($Proxy) { $ProxyArgs["Proxy"] = $Proxy; Write-OK "Proxy: $Proxy" }
 
-# Check existing
-if (Get-ChildItem  -Filter "**Nerd*" -ErrorAction SilentlyContinue) {
+if (Get-ChildItem $FontDir -Filter "*${FontName}*Nerd*" -ErrorAction SilentlyContinue) {
     Write-OK "Already installed."
     exit 0
 }
 
-# Try each URL once (direct -> mirrors)
-    = ":TEMP${FontName}NerdFont.zip"
- = ":TEMP${FontName}NerdFont"
- = @()
-foreach ( in ) {  +=  +  }
+$ZipPath    = "$env:TEMP\${FontName}NerdFont.zip"
+$ExtractDir = "$env:TEMP\${FontName}NerdFont"
+$urls = @($DirectUrl)
+foreach ($m in $Mirrors) { $urls += $m + $DirectUrl }
 
- = 
-for ( = 0;  -lt .Count; ++) {
-     = if ( -eq 0) { "direct" } else { "mirror" }
-    Write-Step "Trying  ..."
+$ok = $false
+for ($i = 0; $i -lt $urls.Count; $i++) {
+    $label = if ($i -eq 0) { "direct" } else { "mirror" }
+    Write-Step "Trying $label ..."
     try {
-        Invoke-WebRequest -Uri [] -OutFile  -UseBasicParsing -TimeoutSec 120 @ProxyArgs
-         = [math]::Round((Get-Item ).Length/1MB, 1)
-        Write-OK "Downloaded  MB"
-         = 
+        Invoke-WebRequest -Uri $urls[$i] -OutFile $ZipPath -UseBasicParsing -TimeoutSec 120 @ProxyArgs
+        $sz = [math]::Round((Get-Item $ZipPath).Length/1MB, 1)
+        Write-OK "Downloaded $sz MB"
+        $ok = $true
         break
-    } catch { Write-Err "Failed: /bin/bash" }
+    } catch { Write-Err "Failed: $_" }
 }
 
-if (-not ) {
-    Write-Err "All sources exhausted. Manual: "
+if (-not $ok) {
+    Write-Err "All sources exhausted. Manual: $DirectUrl"
     exit 1
 }
 
-# Extract
 Write-Step "Extracting ..."
-Expand-Archive -Path  -DestinationPath  -Force
+Expand-Archive -Path $ZipPath -DestinationPath $ExtractDir -Force
 
-# Install
 Write-Step "Installing ..."
- = 0
-Get-ChildItem  -Filter "*.ttf" -Recurse | ForEach-Object {
-    Copy-Item /bin/bash.FullName (Join-Path  /bin/bash.Name) -Force; Write-OK /bin/bash.Name; ++
+$n = 0
+Get-ChildItem $ExtractDir -Filter "*.ttf" -Recurse | ForEach-Object {
+    Copy-Item $_.FullName (Join-Path $FontDir $_.Name) -Force; Write-OK $_.Name; $n++
 }
 
 Add-Type -AssemblyName System.Drawing
- = [System.Drawing.Text.PrivateFontCollection]::new()
-Get-ChildItem  -Filter "*.ttf" -Recurse | ForEach-Object { .AddFontFile(/bin/bash.FullName) }
+$fc = [System.Drawing.Text.PrivateFontCollection]::new()
+Get-ChildItem $ExtractDir -Filter "*.ttf" -Recurse | ForEach-Object { $fc.AddFontFile($_.FullName) }
 
-Remove-Item ,  -Force -Recurse -ErrorAction SilentlyContinue
-Write-Host "Installed  font(s)." -ForegroundColor Green
+Remove-Item $ZipPath, $ExtractDir -Force -Recurse -ErrorAction SilentlyContinue
+Write-Host "Installed $n font(s)." -ForegroundColor Green
 Write-Host "Terminal font: 'JetBrainsMono Nerd Font Mono'" -ForegroundColor Yellow
